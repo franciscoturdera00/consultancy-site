@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turdera AI Consulting — Claude Implementation for Enterprise</title>
+    <meta name="description" content="Enterprise Claude implementation consulting. MCP integration engineering, custom AI tooling, and agent maintenance. Claude Partner Network member.">
+    <meta property="og:title" content="Turdera AI Consulting — Claude Implementation for Enterprise">
+    <meta property="og:description" content="MCP integration engineering, custom Claude-powered agents, and ongoing maintenance for enterprise teams deploying Claude.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://turderaconsulting.com">
+    <meta name="twitter:card" content="summary">
+    <link rel="canonical" href="https://turderaconsulting.com">
+    <!-- Analytics: Plausible or Fathom script goes here -->
+    <!-- <script defer data-domain="turderaconsulting.com" src="https://plausible.io/js/script.js"></script> -->
+    <style>
+        /* ========== Reset & Base ========== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --color-bg: #FAFAF8;
+            --color-bg-alt: #F0EFEB;
+            --color-surface: #FFFFFF;
+            --color-text: #1A1A1A;
+            --color-text-secondary: #5C5C5C;
+            --color-accent: #C96442;
+            --color-accent-hover: #B05636;
+            --color-border: #E0DED8;
+            --color-badge-bg: #EDE9E1;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            --max-width: 1080px;
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 3rem;
+            --space-xl: 5rem;
+            --space-2xl: 7rem;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: local('Inter');
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.65;
+            font-size: 17px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========== Layout ========== */
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        section {
+            padding: var(--space-xl) 0;
+        }
+
+        /* ========== Typography ========== */
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            color: var(--color-text);
+        }
+
+        h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); }
+        h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); margin-bottom: var(--space-md); }
+        h3 { font-size: 1.25rem; margin-bottom: var(--space-xs); }
+
+        p { color: var(--color-text-secondary); max-width: 640px; }
+
+        /* ========== Navigation ========== */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250, 250, 248, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .nav-logo {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--color-text);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 450;
+            transition: color 0.15s;
+        }
+
+        .nav-links a:hover { color: var(--color-text); }
+
+        .nav-cta {
+            background: var(--color-text);
+            color: var(--color-bg) !important;
+            padding: 0.5rem 1.1rem;
+            border-radius: 6px;
+            font-size: 0.88rem !important;
+            font-weight: 500 !important;
+            transition: background 0.15s !important;
+        }
+
+        .nav-cta:hover { background: #333 !important; }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--color-text);
+            margin: 5px 0;
+            transition: 0.2s;
+        }
+
+        /* ========== Hero ========== */
+        .hero {
+            padding: var(--space-2xl) 0 var(--space-xl);
+        }
+
+        .hero h1 {
+            margin-bottom: var(--space-md);
+            max-width: 720px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: var(--space-lg);
+            max-width: 600px;
+        }
+
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--color-badge-bg);
+            color: var(--color-text-secondary);
+            padding: 0.4rem 0.85rem;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 480;
+        }
+
+        .badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            flex-shrink: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            align-items: center;
+        }
+
+        /* ========== Buttons ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.6rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 520;
+            text-decoration: none;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: var(--color-accent-hover); }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg-alt);
+            border-color: #ccc;
+        }
+
+        /* ========== Services ========== */
+        .services-section {
+            background: var(--color-bg-alt);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .service-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: var(--space-md) var(--space-md) var(--space-md);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-number {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: var(--space-sm);
+        }
+
+        .service-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .service-card p {
+            font-size: 0.93rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        .service-meta {
+            margin-top: var(--space-sm);
+            padding-top: var(--space-sm);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--space-md);
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+        }
+
+        .service-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .service-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.75rem;
+        }
+
+        .tool-tag {
+            background: var(--color-bg-alt);
+            color: var(--color-text-secondary);
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 450;
+        }
+
+        /* ========== Credibility ========== */
+        .credibility-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .cred-item {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: flex-start;
+        }
+
+        .cred-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--color-accent);
+        }
+
+        .cred-item h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .cred-item p {
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        /* ========== Process ========== */
+        .process-section {
+            background: var(--color-bg-alt);
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-lg);
+        }
+
+        .process-step {
+            position: relative;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-text);
+            color: var(--color-bg);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .process-step h3 {
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .process-step p {
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        /* ========== CTA ========== */
+        .cta-section {
+            text-align: center;
+        }
+
+        .cta-section p {
+            margin: 0 auto var(--space-lg);
+            max-width: 520px;
+        }
+
+        .cta-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+
+        .cta-email {
+            margin-top: var(--space-md);
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .cta-email a {
+            color: var(--color-text);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* ========== Footer ========== */
+        footer {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+
+        .footer-info {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .footer-links a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 450;
+            transition: color 0.15s;
+        }
+
+        .footer-links a:hover { color: var(--color-text); }
+
+        /* ========== Mobile ========== */
+        @media (max-width: 768px) {
+            section { padding: var(--space-lg) 0; }
+            .hero { padding: var(--space-xl) 0 var(--space-lg); }
+
+            .nav-links { display: none; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: var(--color-bg);
+                border-bottom: 1px solid var(--color-border);
+                padding: var(--space-sm) var(--space-md);
+                gap: var(--space-sm);
+            }
+            .nav-toggle { display: block; }
+
+            .services-grid { grid-template-columns: 1fr; }
+            .process-grid { grid-template-columns: 1fr 1fr; }
+            .credibility-grid { grid-template-columns: 1fr; }
+
+            .footer-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .process-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ========== Section Label ========== */
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: var(--space-xs);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== Nav ========== -->
+<nav>
+    <div class="container">
+        <a href="#" class="nav-logo">Turdera AI Consulting</a>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#background">Background</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="https://calendly.com/placeholder" class="nav-cta" target="_blank" rel="noopener">Book a Call</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ========== Hero ========== -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badges">
+            <span class="badge">Claude Partner Network</span>
+            <span class="badge">Claude Certified Architect (in progress)</span>
+        </div>
+        <h1>I help companies get&nbsp;real&nbsp;work out of Claude Enterprise.</h1>
+        <p>MCP integrations, custom agents, and ongoing maintenance. I connect Claude to your existing tool stack and build internal AI tooling that actually ships to production.</p>
+        <div class="hero-actions">
+            <a href="https://calendly.com/placeholder" class="btn btn-primary" target="_blank" rel="noopener">Book an Intro Call</a>
+            <a href="mailto:francisco@placeholder.com" class="btn btn-secondary">francisco@placeholder.com</a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== Services ========== -->
+<section class="services-section" id="services">
+    <div class="container">
+        <div class="section-label">Services</div>
+        <h2>Three ways I work with Claude Enterprise teams</h2>
+        <p>Each engagement is scoped to a specific deliverable. No open-ended discovery phases, no vague "AI strategy" decks.</p>
+
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-number">01</div>
+                <h3>MCP Integration Engineering</h3>
+                <p>I connect Claude to your enterprise tool stack via Model Context Protocol. You get a production-ready MCP server architecture — authenticated, tested, and deployed — so Claude can read and write to the systems your team already uses.</p>
+                <div class="service-tools">
+                    <span class="tool-tag">Jira</span>
+                    <span class="tool-tag">Confluence</span>
+                    <span class="tool-tag">GitLab</span>
+                    <span class="tool-tag">Slack</span>
+                    <span class="tool-tag">Salesforce</span>
+                    <span class="tool-tag">HubSpot</span>
+                    <span class="tool-tag">HL7/FHIR</span>
+                    <span class="tool-tag">Dynamics 365</span>
+                    <span class="tool-tag">Custom APIs</span>
+                </div>
+                <div class="service-meta">
+                    <span>2&ndash;4 weeks</span>
+                    <span>$10K&ndash;$30K</span>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-number">02</div>
+                <h3>Internal AI Tooling</h3>
+                <p>Custom Claude-powered agents built for your internal workflows. Slack bots for docs Q&A, support ticket triage, automated Jira standups, compliance report generators from EHR/PACS systems. Designed for your team, not a generic template.</p>
+                <div class="service-tools">
+                    <span class="tool-tag">Multi-agent orchestration</span>
+                    <span class="tool-tag">Model routing</span>
+                    <span class="tool-tag">Claude Code</span>
+                    <span class="tool-tag">Agent SDK</span>
+                </div>
+                <div class="service-meta">
+                    <span>3&ndash;6 weeks</span>
+                    <span>$15K&ndash;$50K</span>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div class="service-number">03</div>
+                <h3>Agent Maintenance Retainers</h3>
+                <p>Ongoing care for deployed Claude systems. I fix prompt drift, update MCP integrations when APIs change, add new capabilities, monitor token usage, and optimize costs with tiered model routing (Haiku for triage, Sonnet for generation, Opus for complex reasoning).</p>
+                <div class="service-tools">
+                    <span class="tool-tag">Prompt maintenance</span>
+                    <span class="tool-tag">Cost optimization</span>
+                    <span class="tool-tag">Monitoring</span>
+                    <span class="tool-tag">Caching</span>
+                </div>
+                <div class="service-meta">
+                    <span>Ongoing monthly</span>
+                    <span>$2K&ndash;$5K/mo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== Credibility ========== -->
+<section id="background">
+    <div class="container">
+        <div class="section-label">Background</div>
+        <h2>Why I specialize in Claude</h2>
+        <p>I have production experience with Claude's full stack &mdash; from MCP server architecture to multi-agent orchestration. Not theoretical, not proof-of-concept.</p>
+
+        <div class="credibility-grid">
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div>
+                    <h3>Production MCP Architecture</h3>
+                    <p>Built and deployed MCP server architectures connecting Claude to Jira, Confluence, GitLab, and HL7/FHIR systems in production environments.</p>
+                </div>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div>
+                    <h3>Multi-Agent Orchestration</h3>
+                    <p>Orchestrator patterns with tiered model routing &mdash; Haiku for classification, Sonnet for generation, Opus for complex reasoning. Token-level cost optimization.</p>
+                </div>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div>
+                    <h3>Healthcare IT &amp; HIPAA</h3>
+                    <p>Demo Engineer at Sectra (medical imaging). Designed HIPAA-compliant MCP architecture with PHI de-identification at the MCP layer. Exhibited at HIMSS26.</p>
+                </div>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </div>
+                <div>
+                    <h3>Enterprise Experience</h3>
+                    <p>Prior engineering work at Spotify, NBCUniversal, and Travelers. I understand enterprise constraints &mdash; SSO, compliance, change management, vendor procurement.</p>
+                </div>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div>
+                    <h3>Bilingual Delivery</h3>
+                    <p>Native English and Spanish. I can work directly with teams and stakeholders in both languages &mdash; no translation layer needed.</p>
+                </div>
+            </div>
+
+            <div class="cred-item">
+                <div class="cred-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                    <h3>Claude Partner Network</h3>
+                    <p>Application submitted to Anthropic's Claude Partner Network. Claude Certified Architect certification in progress.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== Process ========== -->
+<section class="process-section" id="process">
+    <div class="container">
+        <div class="section-label">Process</div>
+        <h2>How engagements work</h2>
+        <p>Fixed scope, clear deliverables. No retainer required upfront, no open-ended billing.</p>
+
+        <div class="process-grid">
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <h3>Discovery Call</h3>
+                <p>30-minute call to understand your current tool stack, what you need Claude to do, and where the gaps are. Free, no commitment.</p>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <h3>Scope &amp; Proposal</h3>
+                <p>I write a technical proposal with specific deliverables, timeline, and fixed price. You review it, ask questions, and decide. Typically delivered within 48 hours.</p>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <h3>Implementation</h3>
+                <p>I build it. Regular async updates via Slack or email, working demos along the way. You see progress, not just a final handoff.</p>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">4</div>
+                <h3>Handoff &amp; Support</h3>
+                <p>Full documentation, runbooks, and a walkthrough with your team. Optional maintenance retainer if you want ongoing support.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== CTA ========== -->
+<section class="cta-section">
+    <div class="container">
+        <div class="section-label">Get started</div>
+        <h2>Let's talk about your Claude implementation</h2>
+        <p>Book a 30-minute intro call. I'll ask about your tool stack, what you've tried, and what you need. No pitch, no slides.</p>
+        <div class="cta-actions">
+            <a href="https://calendly.com/placeholder" class="btn btn-primary" target="_blank" rel="noopener">Book an Intro Call</a>
+            <a href="mailto:francisco@placeholder.com" class="btn btn-secondary">Send an Email</a>
+        </div>
+        <p class="cta-email">Or reach me directly at <a href="mailto:francisco@placeholder.com">francisco@placeholder.com</a></p>
+    </div>
+</section>
+
+<!-- ========== Footer ========== -->
+<footer>
+    <div class="container footer-inner">
+        <div class="footer-info">
+            Turdera AI Consulting<br>
+            Francisco Turdera &middot; New Haven, CT<br>
+            Turdera AI Consulting, LLC
+        </div>
+        <div class="footer-links">
+            <a href="https://linkedin.com/in/franciscoturdera" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="https://github.com/franciscoturdera" target="_blank" rel="noopener">GitHub</a>
+            <a href="mailto:francisco@placeholder.com">Email</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Mobile nav toggle
+    document.querySelector('.nav-toggle').addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('open');
+    });
+
+    // Close mobile nav on link click
+    document.querySelectorAll('.nav-links a').forEach(function(link) {
+        link.addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.remove('open');
+        });
+    });
+</script>
+
+</body>
+</html>
