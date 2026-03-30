@@ -17,7 +17,7 @@ This is for a Claude Partner Network application and Anthropic Services Partner 
 
 ## Key Conventions
 
-- Use "I" not "we" — this is a solo practitioner, own it.
+- Use "we" not "I" — present as a specialized firm, not a solo practitioner.
 - No hype words ("revolutionary," "cutting-edge," "unlock the power of").
 - Technical and specific: mention MCP, Claude Code, model routing, HL7/FHIR by name.
 - Confident but not arrogant tone.
